@@ -177,7 +177,13 @@ class GridGameGUI:
             offset = self.cell_size * 0.2
             x1 = tx * self.cell_size + offset
             y1 = (self.env.height - 1 - ty) * self.cell_size + offset
-            self.canvas.create_rectangle(x1, y1, x1 + self.cell_size * 0.6, y1 + self.cell_size * 0.6, fill="#7c3aed", outline="#5b21b6")
+            points = [
+                x1 + self.cell_size * 0.3, y1,  # Top
+                x1 + self.cell_size * 0.6, y1 + self.cell_size * 0.3,  # Right
+                x1 + self.cell_size * 0.3, y1 + self.cell_size * 0.6,  # Bottom
+                x1, y1 + self.cell_size * 0.3   # Left
+            ]
+            self.canvas.create_polygon(points, fill="#7c3aed", outline="#5b21b6")
 
     def run_loop(self):
         self.btn.config(state="disabled")
@@ -201,5 +207,5 @@ class GridGameGUI:
 if __name__ == "__main__":
     root = tk.Tk()
     # Try a larger grid size like 12x12 with 15 food and 3 opponents!
-    app = GridGameGUI(root, width=12, height=12, num_food=15, num_opponents=0)
+    app = GridGameGUI(root, width=12, height=12, num_food=15, num_opponents=3)
     root.mainloop()
