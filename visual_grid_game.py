@@ -170,9 +170,14 @@ class GridGameGUI:
         offset = self.cell_size * 0.15
         x1 = ax * self.cell_size + offset
         y1 = (self.env.height - 1 - ay) * self.cell_size + offset
-        self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.7, y1 + self.cell_size * 0.7, fill="#7c3aed", outline="#5b21b6")
+        self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.7, y1 + self.cell_size * 0.7, fill="#000066",
+                                outline="#1e3a8a")
 
-        for tx,ty in self.
+        for tx,ty in self.env.toxic_traps:
+            offset = self.cell_size * 0.2
+            x1 = tx * self.cell_size + offset
+            y1 = (self.env.height - 1 - ty) * self.cell_size + offset
+            self.canvas.create_rectangle(x1, y1, x1 + self.cell_size * 0.6, y1 + self.cell_size * 0.6, fill="#7c3aed", outline="#5b21b6")
 
     def run_loop(self):
         self.btn.config(state="disabled")
