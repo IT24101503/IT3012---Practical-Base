@@ -6,7 +6,7 @@ import tkinter as tk
 class VisualGridHuntGame:
     """A flexible Pacman-style grid environment with support for configurable opponents and larger scales."""
 
-    def __init__(self, width=10, height=10, num_food=10, num_opponents=2, custom_walls=None):
+    def __init__(self, width=10, height=10, num_food=10, num_opponents=2, num_traps=2, custom_walls=None):
         self.width = width
         self.height = height
         self.agent_pos = [0, 0]  # Starting position (x, y)
@@ -35,6 +35,15 @@ class VisualGridHuntGame:
             if tuple(op_pos) != (0, 0) and tuple(op_pos) not in self.walls and tuple(op_pos) not in self.food_positions:
                 self.opponents.append(op_pos)
 
+        # Generate toxic traps
+        self.toxic_traps = set()
+        while len(self.toxic_traps) < num_traps: 
+            tx = random.randint(0, self.width - 1)
+            ty = random.randint(0, self.height - 1)
+            trap_pos = (tx, ty)
+            if trap_pos != (0, 0) and trap_pos not in self.walls and trap_pos not in self.food_positions:
+                self.toxic_traps.add(trap_pos)
+
         self.score = 0
         self.steps = 0
         self.collision = False
@@ -47,7 +56,8 @@ class VisualGridHuntGame:
             'hit_wall': tuple(self.agent_pos) in self.walls,
             'collision': self.collision,
             'score': self.score,
-            'remaining_food': len(self.food_positions)
+            'remaining_food': len(self.food_positions),
+            'smell_toxin' : tuple(self.agent_pos) in self.toxic_traps
         }
 
     def execute_action(self, action: str):
