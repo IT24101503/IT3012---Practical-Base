@@ -10,6 +10,8 @@ class VisualGridHuntGame:
         self.width = width
         self.height = height
         self.agent_pos = [0, 0]  # Starting position (x, y)
+        self.facing = 'Up'
+        self.agent = SimpleReflexAgent()
 
         if custom_walls is not None:
             self.walls = set(custom_walls)
@@ -49,15 +51,29 @@ class VisualGridHuntGame:
         self.collision = False
 
     def get_percept(self) -> dict:
+        ax, ay = self.agent_pos
+        ahead_pos = [ax, ay]
+        
+        if self.facing == 'Up':
+            ahead_pos[1] = min(self.height - 1, ay + 1)
+        elif self.facing == 'Down':
+            ahead_pos[1] = max(0, ay - 1)
+        elif self.facing == 'Left':
+            ahead_pos[0] = max(0, ax - 1)
+        elif self.facing == 'Right':
+            ahead_pos[0] = min(self.width - 1, ax + 1)
+            
+        ahead_tuple = tuple(ahead_pos)
+        current_tuple = tuple(self.agent_pos)
+
         return {
-            'agent_pos': list(self.agent_pos),
-            'opponent_positions': [list(op) for op in self.opponents],
-            'smells_food': tuple(self.agent_pos) in self.food_positions,
-            'hit_wall': tuple(self.agent_pos) in self.walls,
             'collision': self.collision,
             'score': self.score,
             'remaining_food': len(self.food_positions),
-            'smell_toxin' : tuple(self.agent_pos) in self.toxic_traps
+            'smell_toxin': current_tuple in self.toxic_traps,
+            'wall_ahead': ahead_tuple in self.walls,
+            'food_here': current_tuple in self.food_positions,
+            'ahead_pos' : ahead_tuple
         }
 
     def execute_action(self, action: str):
@@ -187,12 +203,18 @@ class GridGameGUI:
 
     def run_loop(self):
         self.btn.config(state="disabled")
-
         def step():
             if not self.env.is_done():
-                action = random.choice(['Up', 'Down', 'Left', 'Right'])
-                self.env.execute_action(action)
+                # action = random.choice(['Up', 'Down', 'Left', 'Right'])
+                # self.env.execute_action(action)
 
+                percept = self.env.get_percept()
+                
+                action = self.env.agent.sense_and_act(percept)
+                if (action == "Forward"):
+                    action = self.env.facing
+
+                self.env.execute_action(action)
                 self.draw_grid()
                 self.label.config(text=f"Score: {self.env.score} | Steps: {self.env.steps} | Action: {action}")
                 self.root.after(250, step)
@@ -203,6 +225,15 @@ class GridGameGUI:
 
         step()
 
+class SimpleReflexAgent():
+    def sense_and_act(self, percept):
+        if percept.get('food_here'):
+            self.food_positions.remove(tuple_pos)
+        
+        if percept.get('wall_ahead'):
+            return 'Left'
+        else:
+            return 'Forward'
 
 if __name__ == "__main__":
     root = tk.Tk()
