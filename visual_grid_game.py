@@ -71,7 +71,12 @@ class VisualGridHuntGame:
             'score': self.score,
             'remaining_food': len(self.food_positions),
             'smell_toxin': current_tuple in self.toxic_traps,
-            'wall_ahead': ahead_tuple in self.walls,
+            'wall_ahead': ahead_tuple in self.walls or (
+                (self.facing == 'Up' and ay == self.height - 1) or
+                (self.facing == 'Down' and ay == 0) or
+                (self.facing == 'Left' and ax == 0) or
+                (self.facing == 'Right' and ax == self.width - 1)
+            ),
             'food_here': current_tuple in self.food_positions,
             'ahead_pos' : ahead_tuple
         }
@@ -79,6 +84,14 @@ class VisualGridHuntGame:
     def execute_action(self, action: str):
         self.steps += 1
         new_pos = list(self.agent_pos)
+
+        if action == 'forward':
+            action = self.facing
+        elif action == 'turn_left':
+            action = 'Left'
+            self.facing = 'Left'
+        
+        print(action)
 
         if action == 'Up':
             new_pos[1] = min(self.height - 1, new_pos[1] + 1)
@@ -88,6 +101,9 @@ class VisualGridHuntGame:
             new_pos[0] = max(0, new_pos[0] - 1)
         elif action == 'Right':
             new_pos[0] = min(self.width - 1, new_pos[0] + 1)
+        elif action == 'suck':
+            self.food_positions.remove(self.agent_pos)
+
 
         if tuple(new_pos) in self.walls:
             self.score -= 5
@@ -225,15 +241,16 @@ class GridGameGUI:
 
         step()
 
-class SimpleReflexAgent():
+class SimpleReflexAgent:
     def sense_and_act(self, percept):
         if percept.get('food_here'):
-            self.food_positions.remove(tuple_pos)
+            return 'suck'
         
         if percept.get('wall_ahead'):
-            return 'Left'
+            return 'turn_left'
         else:
-            return 'Forward'
+            return 'forward'
+
 
 if __name__ == "__main__":
     root = tk.Tk()
