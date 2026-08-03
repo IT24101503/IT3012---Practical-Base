@@ -11,7 +11,8 @@ class VisualGridHuntGame:
         self.height = height
         self.agent_pos = [0, 0]  # Starting position (x, y)
         self.facing = 'Up'
-        self.agent = SimpleReflexAgent()
+        # self.agent = SimpleReflexAgent()
+        self.agent = ModelBasedAgent()
 
         if custom_walls is not None:
             self.walls = set(custom_walls)
@@ -78,7 +79,8 @@ class VisualGridHuntGame:
                 (self.facing == 'Right' and ax == self.width - 1)
             ),
             'food_here': current_tuple in self.food_positions,
-            'ahead_pos' : ahead_tuple
+            'ahead_pos' : ahead_tuple,
+            'agent_pos' : current_tuple
         }
 
     def execute_action(self, action: str):
@@ -90,6 +92,9 @@ class VisualGridHuntGame:
         elif action == 'turn_left':
             action = 'Left'
             self.facing = 'Left'
+        elif action == 'turn_right':
+            action = 'Right'
+            self.facing = 'Right'
         
         print(action)
 
@@ -247,6 +252,25 @@ class SimpleReflexAgent:
             return 'suck'
         
         if percept.get('wall_ahead'):
+            return 'turn_left'
+        else:
+            return 'forward'
+
+class ModelBasedAgent:
+    def __init__(self):
+        self.visited_cells = set()
+
+    def sense_and_act(self, percept):
+        cur_pos = percept.get('agent_pos')
+        self.visited_cells.add(cur_pos)
+
+        if percept.get('food_here'):
+            return 'suck'
+        
+        if percept.get('wall_ahead'):
+            left_cell =  tuple((max(0, cur_pos[0] - 1), cur_pos[1]))
+            if left_cell in self.visited_cells:
+                return 'turn_right'
             return 'turn_left'
         else:
             return 'forward'
