@@ -16,7 +16,9 @@ class GreedyGridAgent:
 class SearchAgent:
     def __init__(self):
         self.plan = []
-        self.active_algo = 'BFS'
+        # self.active_algo = 'BFS'
+        # self.active_algo = 'DFS'
+        self.active_algo = 'UCS'
 
     def bfs_search(self, percept: dict):
         visited = set()
