@@ -19,7 +19,8 @@ class SearchAgent:
         self.plan = []
         # self.active_algo = 'BFS'
         # self.active_algo = 'DFS'
-        self.active_algo = 'UCS'
+        # self.active_algo = 'UCS'
+        self.active_algo = 'AStar'
 
     def bfs_search(self, percept: dict):
         visited = set()
@@ -125,8 +126,16 @@ class SearchAgent:
                 self.dfs_search(percept)
             elif self.active_algo == 'UCS':
                 self.ucs_search(percept)
-
+            elif self.active_algo == 'AStar':
+                start_pos = tuple(percept['agent_pos'])
+                walls = set(tuple(w) for w in percept['walls'])
+                food_positions = set(tuple(f) for f in percept['all_food_positions'])
+                grid_size = percept['grid_size']
+                if food_positions:
+                    goal_pos = min(food_positions, key=lambda f: self.manhattan_distance(start_pos, f))
+                    self.plan = self.astar_search(start_pos, goal_pos, walls, grid_size, heuristic='manhattan')
             return self.sense_and_act(percept)
+        
         else:
             next_pos = self.plan[0]
             current_pos = tuple(percept['agent_pos'])
