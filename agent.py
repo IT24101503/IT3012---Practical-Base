@@ -1,6 +1,7 @@
 # agent.py
 from collections import deque
 import heapq
+import math
 from random import random
 
 class GreedyGridAgent:
@@ -19,6 +20,8 @@ class SearchAgent:
         # self.active_algo = 'BFS'
         # self.active_algo = 'DFS'
         self.active_algo = 'UCS'
+        print(self.manhattan_distance((0, 0), (3, 4)))
+        print(self.euclidean_distance((0, 0), (3, 4)))
 
     def bfs_search(self, percept: dict):
         visited = set()
@@ -144,3 +147,11 @@ class SearchAgent:
                 return 'Left'
             elif next_pos[0] > current_pos[0]:
                 return 'Right'
+
+    def manhattan_distance(self, pos, goal):
+        hn = abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+        return int(hn)
+
+    def euclidean_distance(self, pos, goal):
+        hn = math.sqrt((pos[0] - goal[0]) ** 2 + (pos[1] - goal[1]) ** 2)
+        return hn
