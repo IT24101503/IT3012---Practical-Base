@@ -20,8 +20,6 @@ class SearchAgent:
         # self.active_algo = 'BFS'
         # self.active_algo = 'DFS'
         self.active_algo = 'UCS'
-        print(self.manhattan_distance((0, 0), (3, 4)))
-        print(self.euclidean_distance((0, 0), (3, 4)))
 
     def bfs_search(self, percept: dict):
         visited = set()
@@ -155,3 +153,44 @@ class SearchAgent:
     def euclidean_distance(self, pos, goal):
         hn = math.sqrt((pos[0] - goal[0]) ** 2 + (pos[1] - goal[1]) ** 2)
         return hn
+
+    def astar_search(self, start_pos, goal_pos, walls, grid_size, heuristic='manhattan'):
+        reached_states = set()
+        priority_queue = []
+
+        gn = 0
+
+        if heuristic == 'manhattan':
+            hn = self.manhattan_distance(start_pos, goal_pos)
+        elif heuristic == 'euclidean':
+            hn = self.euclidean_distance(start_pos, goal_pos)
+
+        fn = gn + hn
+
+        heapq.heappush(priority_queue, (fn, gn, start_pos, [start_pos]))
+
+        while priority_queue:
+            fn, gn, current_pos, path = heapq.heappop(priority_queue)
+
+            if current_pos in reached_states:
+                continue
+            reached_states.add(current_pos)
+
+            if current_pos == goal_pos:
+                return path
+
+            for i, j in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                neighbor = (current_pos[0] + i, current_pos[1] + j)
+
+                if neighbor in walls or neighbor in reached_states or neighbor[0] < 0 or neighbor[0] >= grid_size[0] or neighbor[1] < 0 or neighbor[1] >= grid_size[1]:
+                    continue
+
+                g_new = gn + 1
+                if heuristic == 'manhattan':
+                    h_new = self.manhattan_distance(neighbor, goal_pos)
+                elif heuristic == 'euclidean':
+                    h_new = self.euclidean_distance(neighbor, goal_pos)
+                f_new = g_new + h_new
+
+                heapq.heappush(priority_queue, (f_new, g_new, neighbor, path + [neighbor]))
+        return []
